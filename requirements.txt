@@ -1,0 +1,26 @@
+black==19.10b0
+flake8==3.7.9
+pycodestyle==2.5.0
+pytest==5.4.1
+yamllint==1.23.0
+
+huggingface_hub>=0.0.6
+hyperpyyaml>=0.0.1
+joblib>=0.14.1
+numpy>=1.18.1
+packaging
+pre-commit>=2.3.0
+scipy>=1.4.1
+sentencepiece>=0.1.91
+SoundFile; sys_platform == 'win32'
+torch>=1.8.0
+torchvision
+torchaudio
+tqdm>=4.42.0
+librosa==0.7.2
+numba==0.48.0
+pydub
+
+jupyter
+wavenet_vocoder
+tensorboard
