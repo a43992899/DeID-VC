@@ -1,0 +1,194 @@
+% UW Theme for the tikzposter
+% package.
+%
+% Author: Blair J. Rossetti
+% adapted by Rene Welch
+% Last Modified: 2019-05-12
+%
+
+% -- COLORS --
+
+
+% uw palette based on https://brand.wisc.edu/web/colors/
+
+
+% UW - Madison primary palette
+%\definecolor{UWRed}{HTML}{c5050c}
+%\definecolor{UWDarkRed}{HTML}{9b0000}
+\definecolor{UWRed}{HTML}{941120}
+\definecolor{UWDarkRed}{HTML}{A6192E}
+\definecolor{GreyBlue}{HTML}{dadfe1}
+\definecolor{GreyDark}{HTML}{646569}
+\definecolor{UWLink}{HTML}{0479a8}
+
+\definecolor{Yellow}{HTML}{f2a900} % Pantone 130
+\definecolor{Gold}{HTML}{b58500} % Pantone 125
+\definecolor{MetallicGold}{HTML}{8d702a} % Pantone 8640
+
+% emory secondary palette
+\definecolor{Cyan}{HTML}{00aeef} % Pantone Cyan
+\definecolor{SkyBlue}{HTML}{41b6e6} % Pantone 298
+\definecolor{Teal}{HTML}{487f84} % Pantone 5483
+\definecolor{KellyGreen}{HTML}{348338} % Pantone 7740
+\definecolor{SeaGreen}{HTML}{006c5b} % Pantone 568
+\definecolor{Olive}{HTML}{5c8118} % Pantone 370
+\definecolor{Orange}{HTML}{c35413} % Pantone 1595
+\definecolor{Red}{HTML}{da291c} % Pantone 485
+\definecolor{Magenta}{HTML}{c6007e} % Pantone 233
+\definecolor{Purple}{HTML}{6558b1} % Pantone 2102
+\definecolor{Grape}{HTML}{6d2077} % Pantone 259
+\definecolor{SkyBlue}{HTML}{0082BA} % Pantone 640 C
+
+% neutrals palette
+\definecolor{Black}{HTML}{101820} % Pantone Black 6
+\definecolor{CoolGray5}{HTML}{b1b3b3} % Pantone Cool Gray 5
+\definecolor{CoolGray2}{HTML}{d0d0ce} % Pantone Cool Gray 2
+\definecolor{CoolGray1}{HTML}{d9d9d9} % Pantone Cool Gray 1
+
+% web palette
+\definecolor{LightYellow}{HTML}{ffde75}
+
+% tikzposter color palette
+
+\definecolorpalette{UWPalette} {
+    \definecolor{colorOne}{named}{UWRed}
+    \definecolor{colorTwo}{named}{GreyBlue}
+    \definecolor{colorThree}{named}{UWDarkRed}
+}
+
+% tikzposter style
+\definecolorstyle{UWStyle} {
+    \usecolorpalette{UWPalette}
+}{
+    % background
+    \colorlet{backgroundcolor}{white}
+    \colorlet{framecolor}{white}
+    % title colors
+    \colorlet{titlefgcolor}{Black}
+    \colorlet{titlebgcolor}{white}
+    % block colors
+    \colorlet{blocktitlebgcolor}{colorOne}
+    \colorlet{blocktitlefgcolor}{white}
+    \colorlet{blockbodybgcolor}{white}
+    \colorlet{blockbodyfgcolor}{Black}
+    % innerblock colors
+    \colorlet{innerblocktitlebgcolor}{white}
+    \colorlet{innerblocktitlefgcolor}{Black}
+    \colorlet{innerblockbodybgcolor}{colorTwo}
+    \colorlet{innerblockbodyfgcolor}{Black}
+    % note colors
+    \colorlet{notefgcolor}{Black}
+    \colorlet{notebgcolor}{colorTwo}
+    \colorlet{noteframecolor}{colorTwo}
+}
+
+% -- STYLE --
+
+% background
+\definebackgroundstyle{UWBackgroundStyle}{
+    \draw[line width=0pt, color=framecolor, fill=backgroundcolor]
+    (bottomleft) rectangle (topright);
+}
+
+% title
+\definetitlestyle{UWTitleStyle}{
+    width=\textwidth, linewidth=7pt, titletotopverticalspace=0in
+}{
+    \begin{scope}[line width=\titlelinewidth,]
+    \draw[color=colorThree,round cap-round cap]
+    (\titleposleft,\titleposbottom)--(\titleposright,\titleposbottom);
+    \end{scope}
+}
+
+% block
+\defineblockstyle{UWBlockStyle}{
+    titlewidthscale=1.0, bodywidthscale=1, roundedcorners=10
+}{
+    \draw[color=framecolor, fill=blockbodybgcolor,
+    rounded corners=\blockroundedcorners] (blockbody.south west)
+    rectangle (blockbody.north east);
+    \ifBlockHasTitle
+    \draw[color=framecolor, fill=blocktitlebgcolor,
+    rounded corners=\blockroundedcorners] (blocktitle.south west)
+    rectangle (blocktitle.north east);
+    \fi
+}
+
+% -- THEME -- 
+% uw theme
+\definelayouttheme{UWTheme}{
+    \usecolorstyle[colorPalette=UWPalette]{UWStyle}
+    \usebackgroundstyle{UWBackgroundStyle}
+    \usetitlestyle{UWTitleStyle}
+    \useblockstyle{UWBlockStyle}
+    \useinnerblockstyle{Default}
+    \usenotestyle{Default}
+}
+
+% -- TITLE FORMAT --
+
+% place logo to right of centered title
+\makeatletter
+% \renewcommand\TP@maketitle{%
+%   \centering
+%   \begin{minipage}[b]{0.8\linewidth}
+%         \centering
+%         \color{titlefgcolor}
+%         {\bfseries \Huge \sc \@title \par}
+%         \vspace*{1em}
+%         {\huge \@author \par}
+%         \vspace*{1em}
+%         {\LARGE \@institute}
+%     \end{minipage}%
+%     \tikz[remember picture,overlay]\node[anchor=south east,xshift=0.5\linewidth,inner sep=0pt] {%
+%       \@titlegraphic
+%     };
+    
+% }
+
+%%% SAL MOD
+\newcommand\insertlogoi[2][]{\def\@insertlogoi{\includegraphics[#1]{#2}}}
+\newcommand\insertlogoii[2][]{\def\@insertlogoii{\includegraphics[#1]{#2}}}
+\newlength\LogoSep
+\setlength\LogoSep{10pt}
+\renewcommand\maketitle[1][]{  % #1 keys
+    \normalsize
+    \setkeys{title}{#1}
+    % Title dummy to get title height
+    \node[transparent,inner sep=\TP@titleinnersep, line width=\TP@titlelinewidth, anchor=north, minimum width=\TP@visibletextwidth-2\TP@titleinnersep]
+        (TP@title) at ($(0, 0.5\textheight-\TP@titletotopverticalspace)$) {\parbox{\TP@titlewidth-2\TP@titleinnersep}{\TP@maketitle}};
+    \draw let \p1 = ($(TP@title.north)-(TP@title.south)$) in node {
+        \setlength{\TP@titleheight}{\y1}
+        \setlength{\titleheight}{\y1}
+        \global\TP@titleheight=\TP@titleheight
+        \global\titleheight=\titleheight
+    };
+
+    % Compute title position
+    \setlength{\titleposleft}{-0.5\titlewidth}
+    \setlength{\titleposright}{\titleposleft+\titlewidth}
+    \setlength{\titlepostop}{0.5\textheight-\TP@titletotopverticalspace}
+    \setlength{\titleposbottom}{\titlepostop-\titleheight}
+
+    % Title style (background)
+    \TP@titlestyle
+
+    % Title node
+    \node[inner sep=\TP@titleinnersep, line width=\TP@titlelinewidth, anchor=north, minimum width=\TP@visibletextwidth-2\TP@titleinnersep]
+        at (0,0.5\textheight-\TP@titletotopverticalspace)
+        (title)
+        {\parbox{\TP@titlewidth-2\TP@titleinnersep}{\TP@maketitle}};
+
+    \node[inner sep=0pt,anchor=west] 
+      at ([xshift=\LogoSep]title.west)
+      {\@insertlogoi};
+
+    \node[inner sep=0pt,anchor=east] 
+      at ([xshift=-\LogoSep]title.east)
+      {\@insertlogoii};
+
+    % Settings for blocks
+    \normalsize
+    \setlength{\TP@blocktop}{\titleposbottom-\TP@titletoblockverticalspace}
+}
+\makeatother
