@@ -5,15 +5,16 @@ import os
 import numpy as np
 import argparse
 import json
+import pickle
 import torch
 from scipy.io.wavfile import write
 from env import AttrDict
 from meldataset import MAX_WAV_VALUE
 from models import Generator
+import librosa as lr
 
 h = None
 device = None
-
 
 def load_checkpoint(filepath, device):
     assert os.path.isfile(filepath)
@@ -31,42 +32,41 @@ def scan_checkpoint(cp_dir, prefix):
     return sorted(cp_list)[-1]
 
 
-def inference(a):
+def inference(input_pkl_dir='output/results.pkl', output_dir='hifigan_output', cp_path='/home/yx/hifi-gan/pretrained/VCTK_V1/g_03280000'):
     generator = Generator(h).to(device)
 
-    state_dict_g = load_checkpoint(a.checkpoint_file, device)
+    state_dict_g = load_checkpoint(cp_path, device)
     generator.load_state_dict(state_dict_g['generator'])
 
-    filelist = os.listdir(a.input_mels_dir)
+    spect_vc = pickle.load(open(input_pkl_dir, 'rb'))
 
-    os.makedirs(a.output_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     generator.eval()
     generator.remove_weight_norm()
     with torch.no_grad():
-        for i, filname in enumerate(filelist):
-            x = np.load(os.path.join(a.input_mels_dir, filname))
-            x = torch.FloatTensor(x).to(device)
+        for i, spect in enumerate(spect_vc):
+            name = spect[0]
+            x = spect[1].T
+            x = torch.FloatTensor(x).unsqueeze(0).to(device)
             y_g_hat = generator(x)
             audio = y_g_hat.squeeze()
             audio = audio * MAX_WAV_VALUE
             audio = audio.cpu().numpy().astype('int16')
 
-            output_file = os.path.join(a.output_dir, os.path.splitext(filname)[0] + '_generated_e2e.wav')
+            output_file = os.path.join(output_dir, name + '.wav')
             write(output_file, h.sampling_rate, audio)
             print(output_file)
 
 
-def main():
+def call(a):
     print('Initializing Inference Process..')
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input_mels_dir', default='test_mel_files')
-    parser.add_argument('--output_dir', default='generated_files_from_mel')
-    parser.add_argument('--checkpoint_file', required=True)
-    a = parser.parse_args()
+    output_dir = a.output_wavs_dir
+    cp_path = '/home/yx/hifi-gan/pretrained/VCTK_V1/g_03280000'
+    # cp_path = '/home/yx/hifi-gan/pretrained/UNIVERSAL_V1/g_02500000'
 
-    config_file = os.path.join(os.path.split(a.checkpoint_file)[0], 'config.json')
+    config_file = os.path.join(os.path.split(cp_path)[0], 'config.json')
     with open(config_file) as f:
         data = f.read()
 
@@ -82,9 +82,12 @@ def main():
     else:
         device = torch.device('cpu')
 
-    inference(a)
+    inference(a.input_pkl_dir, output_dir, cp_path)
 
 
 if __name__ == '__main__':
-    main()
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_pkl_dir", required=True)
+    parser.add_argument("--output_wavs_dir", required=True)
+    a = parser.parse_args()
+    call(a)
